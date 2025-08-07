@@ -13,32 +13,37 @@
     "dev:full": "concurrently \"npm run dev\" \"npm run dev:server\""
   },
   "dependencies": {
+    "axios": "^1.11.0",
+    "cors": "^2.8.5",
+    "docx": "^8.5.0",
+    "express": "^4.21.2",
+    "file-saver": "^2.0.5",
+    "mammoth": "^1.6.0",
+    "pdfjs-dist": "^3.11.174",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-dropzone": "^14.2.3",
-    "mammoth": "^1.6.0",
-    "docx": "^8.5.0",
-    "file-saver": "^2.0.5",
-    "pdfjs-dist": "^3.11.174",
-    "express": "^4.18.2",
-    "cors": "^2.8.5",
-    "axios": "^1.6.0"
+    "react-dropzone": "^14.2.3"
   },
   "devDependencies": {
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
     "@vitejs/plugin-react": "^4.1.1",
-    "vite": "^4.5.0",
     "autoprefixer": "^10.4.16",
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.1.10",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.5",
-    "nodemon": "^3.0.1",
-    "concurrently": "^8.2.2"
+    "vite": "^4.5.0"
   },
-  "keywords": ["resume", "ats", "job", "optimization"],
+  "keywords": [
+    "resume",
+    "ats",
+    "job",
+    "optimization"
+  ],
   "author": "Your Name",
   "license": "MIT",
   "engines": {
     "node": ">=16.0.0"
   }
-} 
+}
