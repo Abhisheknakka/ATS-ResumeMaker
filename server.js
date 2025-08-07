@@ -25,7 +25,7 @@ app.post('/api/optimize-resume', async (req, res) => {
     }
 
     // Create the prompt for OpenRouter
-    const prompt = `You are an expert ATS (Applicant Tracking System) resume optimizer. Your task is to optimize a resume for a specific job description while maintaining the original format and structure.
+    const prompt = `You are an expert ATS (Applicant Tracking System) resume optimizer with deep knowledge of recruitment technology and hiring practices. Your task is to optimize a resume for a specific job description while maintaining the original format and structure.
 
 JOB DESCRIPTION:
 ${jobDescription}
@@ -33,30 +33,44 @@ ${jobDescription}
 ORIGINAL RESUME:
 ${resumeText}
 
-Please optimize this resume for the job description above. Follow these guidelines:
+Please optimize this resume for the job description above. Follow these comprehensive guidelines:
 
-1. Maintain the exact same format and structure as the original resume
-2. Add relevant keywords from the job description naturally
-3. Quantify achievements where possible (e.g., "increased efficiency by 25%")
-4. Use action verbs and industry-specific terminology
-5. Ensure ATS-friendly formatting (no complex layouts, tables, or images)
-6. Keep the same sections and headings
-7. Make the content more relevant to the specific job requirements
-8. Maintain professional tone and language
-9. Use proper bullet points (•) for lists and achievements
-10. Format contact information clearly with proper spacing
+**ATS OPTIMIZATION STRATEGIES:**
+1. **Keyword Matching**: Extract and integrate exact keywords from the job description (skills, technologies, certifications, job titles)
+2. **Action Verb Enhancement**: Use strong action verbs that ATS systems recognize (e.g., "Developed", "Implemented", "Managed", "Led", "Created", "Optimized")
+3. **Quantified Achievements**: Add specific metrics and numbers where possible (e.g., "Increased efficiency by 25%", "Managed team of 8 developers", "Reduced costs by $50K")
+4. **Industry-Specific Terminology**: Use the exact technical terms and jargon from the job description
+5. **Relevant Experience Prioritization**: Emphasize experiences that directly relate to the job requirements
 
-IMPORTANT FORMATTING RULES:
+**FORMATTING REQUIREMENTS:**
+- Maintain the exact same format and structure as the original resume
 - Use "•" for bullet points (not "-" or "*")
 - Separate sections with clear line breaks
 - Format job titles as: "Job Title | Company Name | Date Range"
 - Use bold text for important keywords: **keyword**
-- Keep bullet points concise and impactful
+- Keep bullet points concise and impactful (1-2 lines each)
 - Ensure proper alignment and spacing
+- Use standard fonts and simple formatting (no tables, images, or complex layouts)
 
+**CONTENT OPTIMIZATION:**
+- Add relevant keywords naturally within existing content
+- Rewrite bullet points to be more specific and achievement-focused
+- Include quantifiable results and metrics
+- Use industry-standard terminology from the job description
+- Ensure each bullet point starts with a strong action verb
+- Make experience descriptions more relevant to the specific role
+
+**ATS COMPATIBILITY:**
+- Ensure all text is machine-readable (no images, charts, or complex formatting)
+- Use standard section headings (Experience, Education, Skills, etc.)
+- Include a skills section with relevant technical skills
+- Avoid abbreviations unless they're industry-standard
+- Use consistent date formatting (MM/YYYY or Month YYYY)
+
+**RESPONSE FORMAT:**
 Return the optimized resume in the exact same format as the original, with the same sections and structure. Also provide:
-- An ATS compatibility score (0-100)
-- A brief summary of the optimizations made
+- An ATS compatibility score (0-100) based on keyword matching, formatting, and content relevance
+- A detailed summary of the optimizations made
 
 Format your response as JSON with the following structure:
 {
@@ -65,7 +79,9 @@ Format your response as JSON with the following structure:
     {"type": "content", "content": "Section content with proper formatting..."}
   ],
   "atsScore": 85,
-  "summary": ["Optimization 1", "Optimization 2", "Optimization 3"]
+  "summary": ["Optimization 1", "Optimization 2", "Optimization 3"],
+  "keywordMatches": ["keyword1", "keyword2", "keyword3"],
+  "improvements": ["Added quantifiable achievements", "Enhanced action verbs", "Integrated relevant skills"]
 }`
 
     // Call OpenRouter API
@@ -74,15 +90,22 @@ Format your response as JSON with the following structure:
     const response = await axios.post(
       `${OPENROUTER_BASE_URL}/chat/completions`,
       {
-        model: 'moonshotai/kimi-k2:free',
+        model: 'deepseek/deepseek-chat-v3-0324:free',
         messages: [
+          {
+            role: 'system',
+            content: 'You are an expert ATS resume optimizer. Always respond with valid JSON format and provide detailed, actionable optimizations.'
+          },
           {
             role: 'user',
             content: prompt
           }
         ],
-        temperature: 0.3,
-        max_tokens: 4000
+        temperature: 0.2,
+        max_tokens: 6000,
+        top_p: 0.9,
+        frequency_penalty: 0.1,
+        presence_penalty: 0.1
       },
       {
         headers: {
@@ -103,18 +126,34 @@ Format your response as JSON with the following structure:
       const jsonMatch = aiResponse.match(/\{[\s\S]*\}/)
       if (jsonMatch) {
         optimizedResume = JSON.parse(jsonMatch[0])
+        
+        // Validate the response structure
+        if (!optimizedResume.sections || !Array.isArray(optimizedResume.sections)) {
+          throw new Error('Invalid response structure: missing sections array')
+        }
+        
+        // Ensure required fields exist
+        if (!optimizedResume.atsScore) optimizedResume.atsScore = 75
+        if (!optimizedResume.summary) optimizedResume.summary = ['AI optimization applied']
+        if (!optimizedResume.keywordMatches) optimizedResume.keywordMatches = []
+        if (!optimizedResume.improvements) optimizedResume.improvements = []
+        
       } else {
         throw new Error('No JSON found in response')
       }
     } catch (parseError) {
       console.error('Error parsing AI response:', parseError)
-      // Fallback: create a basic structure
+      console.error('Raw AI response:', aiResponse)
+      
+      // Fallback: create a basic structure with the raw response
       optimizedResume = {
         sections: [
           { type: 'content', content: aiResponse }
         ],
         atsScore: 75,
-        summary: ['AI optimization applied', 'Keywords integrated', 'Format maintained']
+        summary: ['AI optimization applied', 'Keywords integrated', 'Format maintained'],
+        keywordMatches: [],
+        improvements: ['Applied AI optimization', 'Maintained original format']
       }
     }
 
